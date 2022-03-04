@@ -1,4 +1,3 @@
-import numpy as np
 import cv2 as cv
 from datetime import datetime
 import time
@@ -11,6 +10,7 @@ DIRECTORY_CAPTURES = "captures/"
 
 # host to get the rrt from
 HOST = "google.com"
+PING_PER_FRAME = 1
 
 
 def main():
@@ -31,7 +31,7 @@ def main():
     # used for calculating the rtt
     trans = pingparsing.PingTransmitter()
     trans.destination = HOST
-    trans.count = 1
+    trans.count = PING_PER_FRAME
     outputTextRtt = ""
 
     while True:
@@ -55,7 +55,10 @@ def main():
             outputTextRtt = "ERROR : " + result.stderr
         else:
             result_parsed = pingparsing.PingParsing().parse(result)
-            outputTextRtt = "rtt to " + HOST + " : " + "{:4.2f}".format(result_parsed.rtt_avg) + " ms"
+            if (result_parsed.packet_loss_count) == PING_PER_FRAME:
+                outputTextRtt = "packet lost, no reading"
+            else:
+                outputTextRtt = "rtt to " + HOST + " : " + "{:4.2f}".format(result_parsed.rtt_avg) + " ms"
         cv.putText(frame, outputTextRtt, (10,100), cv.FONT_HERSHEY_SIMPLEX, 1, (255,255,255),2,cv.LINE_AA)
 
 
