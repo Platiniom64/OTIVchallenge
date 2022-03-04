@@ -2,14 +2,18 @@ import numpy as np
 import cv2 as cv
 from datetime import datetime
 
-# * --------- parameters of the capture --------- 
+# * --------- parameters of the module --------- 
 
 # path to directory where the saved captures should go
 DIRECTORY_CAPTURES = "captures/"
 
+
 def main():
 
     cap = cv.VideoCapture(0)
+
+    # set the frame rate of the capture
+    cap.set(cv.CAP_PROP_FPS, 15)
 
     if not cap.isOpened():
         print("Cannot open camera, it is not connected")
