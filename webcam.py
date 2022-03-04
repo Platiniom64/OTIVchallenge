@@ -2,11 +2,15 @@ import numpy as np
 import cv2 as cv
 from datetime import datetime
 import time
+import pingparsing
 
 # * --------- parameters of the module --------- 
 
 # path to directory where the saved captures should go
 DIRECTORY_CAPTURES = "captures/"
+
+# host to get the rrt from
+HOST = "google.com"
 
 
 def main():
@@ -24,6 +28,12 @@ def main():
     time_last_frame = time.time()
     time_current_frame = time.time()
 
+    # used for calculating the rtt
+    trans = pingparsing.PingTransmitter()
+    trans.destination = HOST
+    trans.count = 1
+    outputTextRtt = ""
+
     while True:
 
         ret, frame = cap.read()
@@ -38,6 +48,16 @@ def main():
         frames_per_second = 1 / time_elapsed
         cv.putText(frame, "FPS: " + str("{:5.2f}".format(frames_per_second)), (10,50), cv.FONT_HERSHEY_SIMPLEX, 1, (255,255,255),2,cv.LINE_AA)
         time_last_frame = time_current_frame
+
+        # display rtt to host
+        result = trans.ping()
+        if result.stderr != "":
+            outputTextRtt = "ERROR : " + result.stderr
+        else:
+            result_parsed = pingparsing.PingParsing().parse(result)
+            outputTextRtt = "rtt to " + HOST + " : " + "{:4.2f}".format(result_parsed.rtt_avg) + " ms"
+        cv.putText(frame, outputTextRtt, (10,100), cv.FONT_HERSHEY_SIMPLEX, 1, (255,255,255),2,cv.LINE_AA)
+
 
         # check if user wants to quit
         if cv.waitKey(1) == ord('q'):
