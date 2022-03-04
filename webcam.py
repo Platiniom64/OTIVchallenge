@@ -17,7 +17,6 @@ def main():
         print("Cannot open camera, it is not connected")
         exit()
 
-
     # set the webcam speed capture
     cap.set(cv.CAP_PROP_FPS, 15)
 
@@ -37,7 +36,7 @@ def main():
         time_current_frame = time.time()
         time_elapsed = time_current_frame - time_last_frame
         frames_per_second = 1 / time_elapsed
-        cv.putText(frame, "FPS: " + str("{:5.2f}".format(frames_per_second)), (10,100), font, 4,(255,255,255),2,cv.LINE_AA)
+        cv.putText(frame, "FPS: " + str("{:5.2f}".format(frames_per_second)), (10,50), cv.FONT_HERSHEY_SIMPLEX, 1, (255,255,255),2,cv.LINE_AA)
         time_last_frame = time_current_frame
 
         # check if user wants to quit
