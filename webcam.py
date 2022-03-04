@@ -1,5 +1,6 @@
 import numpy as np
 import cv2 as cv
+from datetime import datetime
 
 cap = cv.VideoCapture(0)
 if not cap.isOpened():
@@ -7,6 +8,9 @@ if not cap.isOpened():
     exit()
 
 
+
+# path to directory where the saved captures should go
+DIRECTORY_CAPTURES = "captures/"
 
 while True:
 
@@ -22,6 +26,11 @@ while True:
     cv.imshow('frame', frame)
     if cv.waitKey(1) == ord('q'):
         break
+
+    # save the current frame is 's' key is pressed
+    if cv.waitKey(1) == ord('s'):
+        cv.imwrite(DIRECTORY_CAPTURES + "capture " + str(datetime.now()) + ".jpg", frame)
+
 
 
 # When everything done, release the capture
