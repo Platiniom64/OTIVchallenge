@@ -10,7 +10,10 @@ DIRECTORY_CAPTURES = "captures/"
 
 # host to get the rrt from
 HOST = "google.com"
-PING_PER_FRAME = 1
+PING_PER_FRAME = 1      # number of packets that should be sent for calculating rtt to the host
+
+# settings of camera
+FPS = 15                # depends on the camera used
 
 
 def main():
@@ -22,7 +25,7 @@ def main():
         exit()
 
     # set the webcam speed capture
-    cap.set(cv.CAP_PROP_FPS, 15)
+    cap.set(cv.CAP_PROP_FPS, FPS)
 
     # variables used to calculate the actual frame rate
     time_last_frame = time.time()
@@ -32,6 +35,7 @@ def main():
     trans = pingparsing.PingTransmitter()
     trans.destination = HOST
     trans.count = PING_PER_FRAME
+    trans.timeout = str((1 / FPS) * 1000) + "ms"   # amount of ms for each frame
     outputTextRtt = ""
 
     while True:
