@@ -2,21 +2,61 @@ import cv2 as cv
 from datetime import datetime
 import time
 import pingparsing
+import threading
 
 # * --------- parameters of the module --------- 
 
-# path to directory where the saved captures should go
-DIRECTORY_CAPTURES = "captures/"
+DIRECTORY_CAPTURES = "captures/"    # path to directory where the saved captures should go
 
-# host to get the rrt from
-HOST = "google.com"
-PING_PER_FRAME = 1      # number of packets that should be sent for calculating rtt to the host
+HOST = "google.com"                                 # host to get the rrt from
+NUM_PACKETS_PING = 3                                # number of packets that should be sent for calculating rtt to the host
+outputTextRtt = "calculating rtt to host ..."       # variable used between the two thead to display result of rtt
+stopCalcuatingRtt = False                           # used as a flag for the secondary thread to stop
 
-# settings of camera
-FPS = 15                # depends on the camera used
+FPS = 15                # fps of capture, depends on the camera used
 
+
+def ping_host():
+    """
+    method that represents the work that has to be done by secondary thread
+    in order to calculate the rtt to the host.
+    """
+
+    global outputTextRtt  
+
+    trans = pingparsing.PingTransmitter()
+    trans.destination = HOST
+    trans.count = NUM_PACKETS_PING
+    trans.timeout = str(NUM_PACKETS_PING) + "sec"  # timeout of max 1 sec per packets
+
+    while True:
+
+        result = trans.ping()
+
+        # if ping fails, it prints error to stderr stream
+        if result.stderr != "":
+            outputTextRtt = "PING ERROR : " + result.stderr
+
+        # if ping succeeded
+        else:
+
+            result_parsed = pingparsing.PingParsing().parse(result)
+
+            # if all packets were lot, can't get the average rtt
+            if (result_parsed.packet_loss_count) == NUM_PACKETS_PING:
+                outputTextRtt = "rtt packet(s) lost, no reading"
+
+            else:
+                outputTextRtt = "rtt to " + HOST + " : " + "{:4.2f}".format(result_parsed.rtt_avg) + " ms"
+        
+        if stopCalcuatingRtt:
+            break
 
 def main():
+    """
+    main method of the main thread.
+    It starts the capture and the secondary threads.
+    """
 
     cap = cv.VideoCapture(0)
 
@@ -31,12 +71,9 @@ def main():
     time_last_frame = time.time()
     time_current_frame = time.time()
 
-    # used for calculating the rtt
-    trans = pingparsing.PingTransmitter()
-    trans.destination = HOST
-    trans.count = PING_PER_FRAME
-    trans.timeout = str((1 / FPS) * 1000) + "ms"   # amount of ms for each frame
-    outputTextRtt = ""
+    # create secondary thread that calculates rtt
+    threading.Thread(target=ping_host).start()
+
 
     while True:
 
@@ -46,25 +83,15 @@ def main():
             print("Can't receive frame (stream end?). Exiting ...")
             break
 
-        # display frame rate
+        # calculate and display frame rate
         time_current_frame = time.time()
         time_elapsed = time_current_frame - time_last_frame
         frames_per_second = 1 / time_elapsed
         cv.putText(frame, "FPS: " + str("{:5.2f}".format(frames_per_second)), (10,50), cv.FONT_HERSHEY_SIMPLEX, 1, (255,255,255),2,cv.LINE_AA)
         time_last_frame = time_current_frame
 
-        # display rtt to host
-        result = trans.ping()
-        if result.stderr != "":
-            outputTextRtt = "ERROR : " + result.stderr
-        else:
-            result_parsed = pingparsing.PingParsing().parse(result)
-            if (result_parsed.packet_loss_count) == PING_PER_FRAME:
-                outputTextRtt = "packet lost, no reading"
-            else:
-                outputTextRtt = "rtt to " + HOST + " : " + "{:4.2f}".format(result_parsed.rtt_avg) + " ms"
+        # display rtt result
         cv.putText(frame, outputTextRtt, (10,100), cv.FONT_HERSHEY_SIMPLEX, 1, (255,255,255),2,cv.LINE_AA)
-
 
         # check if user wants to quit
         if cv.waitKey(1) == ord('q'):
@@ -74,12 +101,16 @@ def main():
         if cv.waitKey(1) == ord('s'):
             cv.imwrite(DIRECTORY_CAPTURES + "capture " + str(datetime.now()) + ".jpg", frame)
         
-        cv.imshow('frame', frame)
+        cv.imshow('webcam capture', frame)
 
 
     # When everything done, release the capture
     cap.release()
     cv.destroyAllWindows()
+
+    # don't forget to stop secondary threads
+    global stopCalcuatingRtt
+    stopCalcuatingRtt = True
 
 
 if __name__ == "__main__":
