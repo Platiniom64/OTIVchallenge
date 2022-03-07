@@ -98,7 +98,7 @@ def main():
             break
 
         # save the current frame if 's' key is pressed
-        if cv.waitKey(1) == ord('s'):
+        if cv.waitKey(50) == ord('s'):
             cv.imwrite(DIRECTORY_CAPTURES + "capture " + str(datetime.now()) + ".jpg", frame)
         
         cv.imshow('webcam capture', frame)
