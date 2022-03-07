@@ -87,11 +87,11 @@ def main():
         time_current_frame = time.time()
         time_elapsed = time_current_frame - time_last_frame
         frames_per_second = 1 / time_elapsed
-        cv.putText(frame, "FPS: " + str("{:5.2f}".format(frames_per_second)), (10,50), cv.FONT_HERSHEY_SIMPLEX, 1, (255,255,255),2,cv.LINE_AA)
+        cv.putText(frame, "FPS: " + str("{:5.2f}".format(frames_per_second)), (10,30), cv.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255),2,cv.LINE_AA)
         time_last_frame = time_current_frame
 
         # display rtt result
-        cv.putText(frame, outputTextRtt, (10,100), cv.FONT_HERSHEY_SIMPLEX, 1, (255,255,255),2,cv.LINE_AA)
+        cv.putText(frame, outputTextRtt, (10,60), cv.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255),2,cv.LINE_AA)
 
         # check if user wants to quit
         if cv.waitKey(1) == ord('q'):
