@@ -1,8 +1,23 @@
+"""
+This module shows the stream of frames from the webcam, and in parallel shows the rtt time to a host.
+press   'q' to quit
+        's' to save the current frame. By default the saved frames go to the 'captures' directory
+
+external dependencies used:
+    openscv         4.2.0
+    pingparsing     1.4.0
+
+Vladimir Hanin
+07/03/2022
+"""
+
 import cv2 as cv
 from datetime import datetime
 import time
 import pingparsing
 import threading
+
+
 
 # * --------- parameters of the module --------- 
 
@@ -14,6 +29,7 @@ outputTextRtt = "calculating rtt to host ..."       # variable used between the 
 stopCalcuatingRtt = False                           # used as a flag for the secondary thread to stop
 
 FPS = 15                # fps of capture, depends on the camera used
+
 
 
 def ping_host():
@@ -94,7 +110,7 @@ def main():
         cv.putText(frame, outputTextRtt, (10,60), cv.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255),2,cv.LINE_AA)
 
         # check if user wants to quit
-        if cv.waitKey(1) == ord('q'):
+        if cv.waitKey(10) == ord('q'):
             break
 
         # save the current frame if 's' key is pressed
@@ -111,7 +127,6 @@ def main():
     # don't forget to stop secondary threads
     global stopCalcuatingRtt
     stopCalcuatingRtt = True
-
 
 if __name__ == "__main__":
     main()
