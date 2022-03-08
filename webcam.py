@@ -23,12 +23,15 @@ import threading
 
 DIRECTORY_CAPTURES = "captures/"    # path to directory where the saved captures should go
 
-HOST = "google.com"                                 # host to get the rrt from
-NUM_PACKETS_PING = 3                                # number of packets that should be sent for calculating rtt to the host
+HOST = "google.com"                 # host to get the rrt from
+NUM_PACKETS_PING = 3                # number of packets that should be sent for calculating rtt to the host
+FPS = 15                            # fps of capture, depends on the camera used
+
+
+# * --------- private variables
 outputTextRtt = "calculating rtt to host ..."       # variable used between the two thead to display result of rtt
 stopCalcuatingRtt = False                           # used as a flag for the secondary thread to stop
 
-FPS = 15                # fps of capture, depends on the camera used
 
 
 
